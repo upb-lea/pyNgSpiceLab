@@ -1,0 +1,16 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+
+# Directories
+.idea/
+__pycache__/
+.eggs/
+build/
+dist/
+gpgit/
+docs/build
+
+# Files
+dictionary.dic
+readme.html
