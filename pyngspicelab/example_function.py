@@ -8,7 +8,7 @@ def example_1(my_list: list[float]) -> float:
     :param my_list: List, e.g. [1, 2, 3]
     :return: sum of all list elements
     """
-    return np.sum(my_list)
+    return float(np.sum(my_list))
 
 
 if __name__ == "__main__":
