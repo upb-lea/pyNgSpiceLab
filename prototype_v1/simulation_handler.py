@@ -73,7 +73,7 @@ class SimulationHandler:
         raw_result = self._save_raw_file(config_info.circuit_name, config_number)
         logger.info(f"Results saved to: {raw_result}")
 
-    def _save_raw_file(self, circuit_name:str, config_number: int) -> Path:
+    def _save_raw_file(self, circuit_name: str, config_number: int) -> Path:
         """
         Save raw file of the immediate simulation by communicating with ngspice.
         

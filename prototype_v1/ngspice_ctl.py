@@ -102,7 +102,8 @@ if __name__ == "__main__":
     session.start_workflow(request)
 
     # View results
-    handler = ResultHandler(r"/home/tatsat/whb/github/pyNgSpiceLab/results")
+    results_path = Path(r"/home/tatsat/whb/github/pyNgSpiceLab/results")
+    handler = ResultHandler(results_path)
 
     a = handler.load_run("test_circuit", 1)
     b = handler.load_run("test_circuit", 2)

@@ -9,8 +9,6 @@ import logging
 from pathlib import Path
 
 # own libraries
-from dtos import SignalSetDto
-from ngspice_wrapper import NgspiceWrapper
 
 # 3rd party libraries
 import numpy as np
@@ -32,6 +30,7 @@ class ResultHandler:
     def __init__(self, results_dir: Path, dialect: str = "ngspice"):
         """
         Initialize the path to the raw files and the member variables of the ResultHandler class.
+
         :param results_dir: Directory in which the raw result files are stored
         :type results_dir: Path
         :param dialect: Dialect of the simulator that created the raw files
@@ -48,6 +47,7 @@ class ResultHandler:
     def load_run(self, circuit_name: str, config_number: int) -> str:
         """
         Load the raw result file of a configuration.
+
         :param circuit_name: Name of the original schematic circuit file
         :type circuit_name: str
         :param config_number: Configuration number of the simulated configuration
@@ -68,6 +68,7 @@ class ResultHandler:
     def list_runs(self) -> list[str]:
         """
         List the run IDs of all loaded runs.
+
         :return: Run IDs of the loaded runs
         :rtype: list[str]
         """
@@ -76,6 +77,7 @@ class ResultHandler:
     def list_signals(self, run_id: str) -> list[str]:
         """
         List the trace names available in the raw file of a run (without the time axis).
+
         :param run_id: Run ID returned by load_run
         :type run_id: str
         :return: Trace names available in the run
@@ -88,6 +90,7 @@ class ResultHandler:
     def get_channel(self, run_id: str, trace_name: str) -> Channel:
         """
         Get a signal of a run as a PySignalScope channel.
+
         :param run_id: Run ID returned by load_run
         :type run_id: str
         :param trace_name: Trace name as listed by list_signals (e.g. "I(l1)")
@@ -115,6 +118,7 @@ class ResultHandler:
     def get_channels(self, requests: list[tuple[str, str]]) -> list[Channel]:
         """
         Get several signals as PySignalScope channels.
+
         :param requests: List of (run ID, trace name) pairs
         :type requests: list[tuple[str, str]]
         :return: Channels in the order of the requests
@@ -125,6 +129,7 @@ class ResultHandler:
     def _get_raw(self, run_id: str) -> RawRead:
         """
         Get the opened raw file of a run.
+
         :param run_id: Run ID returned by load_run
         :type run_id: str
         :return: Opened raw file
@@ -139,6 +144,7 @@ class ResultHandler:
     def _unit_of(trace_name: str) -> str:
         """
         Derive the unit of a signal from its trace name.
+
         :param trace_name: Trace name (e.g. "V(vout)" or "I(l1)")
         :type trace_name: str
         :return: "V" for voltages, "A" for currents, otherwise an empty string
@@ -151,6 +157,7 @@ class ResultHandler:
     def _locate_file(self, run_id: str) -> Path:
         """
         Build the path of the raw file of a run and check that it exists.
+
         :param run_id: Run ID, which equals the file name without extension
         :type run_id: str
         :return: File path of the raw file
