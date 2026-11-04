@@ -7,10 +7,10 @@ Finally, it handles the simulation runs.
 
 # python libraries
 import logging
+from pathlib import Path
 
 # own libraries
 from circuit_handler import CircuitHandler
-from result_handler import ResultHandler
 from ngspice_wrapper import NgspiceWrapper
 
 # 3rd party libraries
@@ -23,14 +23,16 @@ class SimulationHandler:
     """Class that handles simulation runs and communications with ngspice_wrapper library."""
 
     _circuit_handler: CircuitHandler  # CircuitHandler object allowing communication with CircuitHandler module
-    _result_handler: ResultHandler
     _ngspice: NgspiceWrapper  # NgspiceWrapper object allowing communication with ngspice_wrapper library
 
-    def __init__(self, circuit_handler: CircuitHandler, result_handler: ResultHandler):
+    def __init__(self, circuit_handler: CircuitHandler):
         """Initialize the member variables of the SimulationHandler class."""
         self._circuit_handler = circuit_handler
-        self._result_handler = result_handler
         self._ngspice = NgspiceWrapper()
+
+        # Create a 'results' directory in the current working directory.
+        self._result_directory = Path.cwd() / "results"
+        self._result_directory.mkdir(parents=True, exist_ok=True)
 
     def start_simulation_process(self, config_number: int) -> None:
         """
@@ -68,5 +70,24 @@ class SimulationHandler:
         self._ngspice.command(tran_cmd)
 
         # Save simulation results in a raw file
-        raw_result = self._result_handler.save_raw_file(config_number, self._ngspice)
+        raw_result = self._save_raw_file(config_info.circuit_name, config_number)
         logger.info(f"Results saved to: {raw_result}")
+
+    def _save_raw_file(self, circuit_name:str, config_number: int) -> Path:
+        """
+        Save raw file of the immediate simulation by communicating with ngspice.
+        
+        :param circuit_name: Name of the original schematic circuit file
+        :type circuit_name: str
+        :param config_number: Configuration number of the configuration whose simulation is completed
+        :type config_number: int
+        :return: File path of the save result
+        :rtype: Path
+        """
+        # File path variable defining the naming convention of result files
+        raw_file = (self._result_directory / f"{circuit_name}-config_{config_number}.raw")
+
+        # Communicate with ngspice_wrapper library to write results to raw file
+        self._ngspice.command(f"write {raw_file}")
+
+        return Path(raw_file)

@@ -8,6 +8,7 @@ It communicates with other modules such as Circuit Handler, Simulation Handler, 
 # python libraries
 import logging
 from typing import List
+from pathlib import Path
 
 # own libraries
 from dtos import ConfigInfoDto, UserRequestDto
@@ -16,7 +17,7 @@ from simulation_handler import SimulationHandler
 from result_handler import ResultHandler
 
 # 3rd party libraries
-
+from pysignalscope import Scope
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -30,8 +31,8 @@ class SessionHandler:
 
     def __init__(self):
         self._circuit_handler = CircuitHandler()
-        self._result_handler = ResultHandler()
-        self._simulation_handler = SimulationHandler(self._circuit_handler, self._result_handler)
+        # self._result_handler = ResultHandler()
+        self._simulation_handler = SimulationHandler(self._circuit_handler)
 
     def start_workflow(self, request: UserRequestDto) -> None:
         """
@@ -70,9 +71,13 @@ if __name__ == "__main__":
     # Also replace the path to the library in the test_circuit.cir
     request.circuit_path = "prototype_v1/circuit_files/test_circuit.cir"
 
+    # Variable declaration
+    circuit_name = Path(request.circuit_path).stem
+
     # Circuit configuration parameters list
     request.configurations = [
         ConfigInfoDto(
+            circuit_name=circuit_name,
             config_number=1,
             config_parameters={"R1": "1k", "C1": "100u"},
             config_path=request.circuit_path,
@@ -81,8 +86,9 @@ if __name__ == "__main__":
             sim_time="3m"
         ),
         ConfigInfoDto(
+            circuit_name=circuit_name,
             config_number=2,
-            config_parameters={"R1": "2k", "C1": "200u"},
+            config_parameters={"R1": "100k", "C1": "2000u"},
             config_path=request.circuit_path,
             sim_type="tran",
             sim_time_step="10u",
@@ -94,3 +100,15 @@ if __name__ == "__main__":
 
     session = SessionHandler()
     session.start_workflow(request)
+
+    # View results
+    handler = ResultHandler(r"/home/tatsat/whb/github/pyNgSpiceLab/results")
+
+    a = handler.load_run("test_circuit", 1)
+    b = handler.load_run("test_circuit", 2)
+
+    print(handler.list_signals(a))     # the user sees what exists, then chooses
+    print(handler.list_signals(b))     # may differ from run a
+
+    channels = handler.get_channels([(a, "V(dc_1)"), (a, "V(load)"), (b, "V(dc_1)"), (b, "V(load)")])
+    Scope.plot_channels(channels)

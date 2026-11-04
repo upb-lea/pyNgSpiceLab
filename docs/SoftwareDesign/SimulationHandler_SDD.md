@@ -1,10 +1,10 @@
 # **SimulationHandler: Software Design Document**
 
 ## **SimulationHandler: Software Design Overview**
-The SimulationHandler manages the simulation tasks for the circuits and its configurations. It also handles the communication with the ngspice_wrapper library. Via this communication, the SimulationHandler can load the circuit schematic into the ngspice and also help altering the values of the components in the schematic. It also communicates with the CircuitHandler module to ask for the circuit information. For dynamic stopping and saving the results, it communicates with the TriggerHandler and ResultHandler module respectively.
+The SimulationHandler manages the simulation tasks for the circuits and its configurations. It also handles the communication with the ngspice_wrapper library. Via this communication, the SimulationHandler can load the circuit schematic into the ngspice and also help altering the values of the components in the schematic. It also communicates with the CircuitHandler module to ask for the circuit information. For dynamic stopping, it communicates with the TriggerHandler module.
 
 ## Description of the SimulationHandler
-The SimulationHandler module shall be realized in the form of a class. The simulation functionalities will be triggered by the SessionHandler module. The SimulationHandler then receive only the circuit configuration number from the SessionHandler. Rest of the details of the circuit will be asked from the CircuitHandler. Once the information is received, the SimulationHandler uses ngspice_wrapper to load the circuit schematic into the ngspice. It also handles altering of the values if needed for a configuration. It proceeds to running the simulation based on the simulation parameters in the information provided by the CircuitHandler. If the simulation is successful, the results will be saved in local storage with the help of the ResultHandler.
+The SimulationHandler module shall be realized in the form of a class. The simulation functionalities will be triggered by the SessionHandler module. The SimulationHandler then receive only the circuit configuration number from the SessionHandler. Rest of the details of the circuit will be asked from the CircuitHandler. Once the information is received, the SimulationHandler uses ngspice_wrapper to load the circuit schematic into the ngspice. It also handles altering of the values if needed for a configuration. It proceeds to running the simulation based on the simulation parameters in the information provided by the CircuitHandler. If the simulation is successful, the results will be saved in local storage.
 
 ## Program Workflow
 
@@ -20,7 +20,8 @@ The SimulationHandler then loads the circuit configuration into **ngspice** thro
 
 The SimulationHandler then constructs the simulation command using the simulation parameters, such as `sim_type`, `sim_time`, and `sim_time_step`. The command is passed to the `ngspice_wrapper` to start the simulation.
 
-The simulation results are collected and saved by the **ResultHandler** as a raw result file in local storage. If the simulation fails or encounters an error, the error shall be logged and, where applicable, reported to the user.
+The SimulationHandler shall create and maintain a directory in the local storage that contains all the results. Since the saving of the results will be initialized by the SimulationHandler, the `circuit_name` and `config_number` is extracted from **ConfigInfoDto**. This information is used in naming of the raw file for easy identification. Currently the naming convention is set to the following:
+*circuit_name-config_number.raw*
 
 The simulation is executed in **background mode**, using the background simulation functionality provided by ngspice. This allows the Python application and other components of **pyNgSpiceLab** to continue performing other tasks while the simulation is running.
 
