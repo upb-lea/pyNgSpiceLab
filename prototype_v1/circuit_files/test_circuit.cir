@@ -1,0 +1,36 @@
+* KiCad schematic - GaN Half-Bridge Test Circuit
+
+* Use absolute path for the library file so ngspice can locate it regardless of CWD
+.lib /home/tatsat/whb/github/pyNgSpiceLab/prototype_v1/circuit_files/GaN_PSpice_GS61008T_L1V4P1_ASA.lib
+
+* Power Supply & DC Bus
+VLS2 DC_1 0 DC 48
+Lnet1 DC_1 HS 10n
+C1 HS 0 100u
+
+* High-Side Switches (3 terminals: Drain Gate Source)
+XQ1 HS Q1_Gate SW_Node GaN_PSpice_GS61008T_L1V4P1
+XQ2 HS Q2_Gate SW_Node GaN_PSpice_GS61008T_L1V4P1
+
+* Low-Side Switches (3 terminals: Drain Gate Source)
+XQ3 SW_Node Q3_Gate 0 GaN_PSpice_GS61008T_L1V4P1
+XQ4 SW_Node Q4_Gate 0 GaN_PSpice_GS61008T_L1V4P1
+XQ5 SW_Node Q5_Gate 0 GaN_PSpice_GS61008T_L1V4P1
+
+* Gate Resistors
+R1 D_HS Q1_Gate 5.1
+R2 D_HS Q2_Gate 5.1
+R3 D_LS Q3_Gate 10
+R4 D_LS Q4_Gate 10
+R5 D_LS Q5_Gate 10
+
+* Output Filter & Load
+L1 SW_Node Load 10u
+C2 Load 0 100n
+RLOAD Load 0 10
+
+* Gate Driver Pulse Sources
+VHS1 D_HS SW_Node PULSE(0 6 40n 2n 2n 789n 3.33u)
+VLS1 D_LS 0 PULSE(0 6 873n 2n 2n 2453n 3.33u)
+
+.end

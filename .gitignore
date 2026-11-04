@@ -14,3 +14,12 @@ docs/build
 # Files
 dictionary.dic
 readme.html
+results/
+
+# Python virtual environments
+.venv/
+venv
+
+# Python cache files
+__pycache__/
+*.py[cod]
