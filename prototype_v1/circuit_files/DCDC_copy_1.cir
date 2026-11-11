@@ -1,0 +1,31 @@
+.title KiCad schematic
+* Following is a fixed path to a adapter library which is changed based on config
+.lib /home/tatsat/whb/learning/ngspice_test_setup/libs/shared_library.lib
+.lib /home/tatsat/whb/learning/ngspice_test_setup/libs/active_adapter_Q1.lib
+.lib /home/tatsat/whb/learning/ngspice_test_setup/libs/active_adapter_Q2.lib
+.lib /home/tatsat/whb/learning/ngspice_test_setup/libs/active_adapter_Q3.lib
+.lib /home/tatsat/whb/learning/ngspice_test_setup/libs/active_adapter_Q4.lib
+.lib /home/tatsat/whb/learning/ngspice_test_setup/libs/active_adapter_Q5.lib
+.param Temp=27
+
+Lnet1 DC_1 HS 10n
+C1 HS 0 100u
+XQ1 Q1_Gate HS SW_Node GAN_DEVICE_Q1
+XQ2 Q2_Gate HS SW_Node GAN_DEVICE_Q2
+XQ3 Q3_Gate SW_Node 0 GAN_DEVICE_Q3
+XQ4 Q4_Gate SW_Node 0 GAN_DEVICE_Q4
+XQ5 Q5_Gate SW_Node 0 GAN_DEVICE_Q5
+R1 D_HS Q1_Gate 5.1
+R2 Q2_Gate D_HS 5.1
+R3 D_LS Q3_Gate 10
+R4 D_LS Q4_Gate 10
+R5 D_LS Q5_Gate 10
+L1 SW_Node Load 10u
+C2 Load 0 100n
+R42 Load 0 10
+VHS1 D_HS SW_Node PULSE(0 6 40n 2n 2n 789n 3.33u)   ; HS Gate voltage
+VLS1 D_LS 0 PULSE( 0 6 873n 2n 2n 2453n 3.33u )  ; LS gate  voltager
+*VLS2 VCC GND PULSE( 0 48 1n 2n 2n 5 5 ) ; Constant voltage source
+VDC1 DC_1 0 DC 48 
+.end
+

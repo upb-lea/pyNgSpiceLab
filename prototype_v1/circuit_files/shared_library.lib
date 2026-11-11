@@ -1,0 +1,4 @@
+        .include "prototype_v1/circuit_files/GaN_PSpice_GS61008T_L1V4P1_ASA_CHG.lib"
+                .include "prototype_v1/circuit_files/EPC2212_V1_PSPICE.net"
+                .include "prototype_v1/circuit_files/GaN_PSpice_GS61008T_L1V4P1_ASA.lib"
+        

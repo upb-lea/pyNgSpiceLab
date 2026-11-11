@@ -1,0 +1,4 @@
+        .subckt GAN_DEVICE_Q1 G D S
+        XQ1 D G S G GaN_PSpice_GS61008T_L1V4P1
+        .ends GAN_DEVICE_Q1
+        

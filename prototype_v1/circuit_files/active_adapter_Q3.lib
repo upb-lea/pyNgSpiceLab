@@ -1,0 +1,4 @@
+        .subckt GAN_DEVICE_Q3 G D S
+        XQ3 G D S  EPC2212
+        .ends GAN_DEVICE_Q3
+        

@@ -9,8 +9,10 @@ It keeps track of important information about the circuit configurations and can
 import os
 import logging
 from typing import List
+from pathlib import Path
 
 # 3rd party libraries
+from spicelib import SpiceEditor
 
 # own libraries
 from dtos import ConfigInfoDto, UserRequestDto
@@ -76,14 +78,79 @@ class CircuitHandler:
         return True
         
     def _validate_configs(self, schematic_file_path: str, config_params_list: List[ConfigInfoDto]) -> bool:
-        """Boundary checks for the parameters in the all the configurations of the circuit."""
-        logger.info("Configuration parameters passed boundary checks.")
-        # TODO: Implement the boundary check conditions
+        """Validate component names and values in all circuit configurations."""
+        # Safety check: Ensure the list isn't empty
+        if not config_params_list:
+            logger.warning("No configurations provided to validate.")
+            return True  # Nothing to fail
+        
+        # Using the original schematic file path for checking existence of components
+        editor = SpiceEditor(schematic_file_path)
+        logger.info(f"circuit_path: {schematic_file_path}")
+
+        # Create a list of all the components present in the netlist
+        all_components = editor.get_components()
+        # Bring all the components names into upper case for standard comparison
+        all_components_upper = [str(item).upper() for item in all_components]
+
+        # For each configuration check the component names and the values
+        for config in config_params_list:
+            for component_ref, new_value in config.config_parameters.items():
+
+                # Checking for invalid component names
+                if component_ref.upper() not in all_components_upper:
+                    logger.error(f"Component '{component_ref}' in configuration number '{config.config_number}' not found in the netlist.")
+                    raise ValueError(f"Component '{component_ref}' not found in the circuit schematic file.")
+
+                # Checking for invalid component values
+                try:
+                    numeric_val = self._parse_float_value(new_value)
+                    if numeric_val <= 0:
+                        print(f"numeric_value: {numeric_val}")
+                        raise ValueError(f"Value must be strictly greater than 0. Got '{numeric_val}'")
+                except ValueError as e:
+                    if "greater than 0" in str(e):
+                        raise
+                    raise ValueError(
+                        f"Invalid numeric format for '{component_ref}': '{new_value}'"
+                    ) from e
+
         return True
 
     def _adapt_schematic_file(self, config: ConfigInfoDto, lib_map: dict[str, dict[str, str]]) -> bool:
         """Generate schematic file for configurations with adapted libraries and update the ConfigInfoDto."""
-        # TODO: schematic adaption mechanism and update ConfigInfoDto
+        # Shared and adapter library template definitions
+        adapter_lib_template = """\
+        .subckt GAN_DEVICE_{pos} G D S
+        X{pos} {adapter_subckt}
+        .ends GAN_DEVICE_{pos}
+        """
+
+        shared_lib_template = """\
+        .include "{adapter_path}"
+        """
+
+        # Variable that keeps track of the libraries used in a configuration
+        used_libraries = set(config.config_libraries.values())
+
+        # Write the paths of the used libraries once in the shared library
+        shared_lib_text = "".join(shared_lib_template.format(adapter_path=lib_map[lib]["path"]) for lib in used_libraries)
+
+        if config.config_path is None:
+            raise ValueError("Configuration path cannot be None")
+        
+        shared_lib_path = Path(config.config_path).parent / "shared_library.lib"
+        shared_lib_path.write_text(shared_lib_text)
+
+        # Write subcircuit definitions in separate file for each transistor
+        transistors_list = config.config_libraries.keys()
+
+        for transistor in transistors_list:
+            transistor_lib = config.config_libraries[transistor]
+            tmp_lib_text = adapter_lib_template.format(adapter_subckt=lib_map[transistor_lib]["subckt"], pos=transistor)
+            tmp_lib_path = Path(config.config_path).parent / f"active_adapter_{transistor}.lib"
+            tmp_lib_path.write_text(tmp_lib_text)
+
         self._circuit_info.append(config)
         return True
 
@@ -102,3 +169,26 @@ class CircuitHandler:
                 return config
         
         return None
+
+    @staticmethod
+    def _parse_float_value(val_str: str) -> float:
+        """Convert a SPICE string value (e.g., '1.5u', '10k', '4.7meg') to a float."""
+        val_str = val_str.strip().lower()
+
+        # SPICE multipliers mapping
+        multipliers = {
+            't': 1e12, 'g': 1e9, 'meg': 1e6, 'k': 1e3,
+            'm': 1e-3, 'u': 1e-6, 'n': 1e-9, 'p': 1e-12, 'f': 1e-15
+        }
+
+        # Multiplier variable declaration
+        mult = 1.0
+
+        # Check for suffixes
+        for suffix, m in multipliers.items():
+            if val_str.endswith(suffix):
+                mult = m
+                val_str = val_str[:-len(suffix)]
+                break
+
+        return float(val_str)*mult
