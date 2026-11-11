@@ -8,13 +8,14 @@ This module performs simulation results related task like saving, viewing and an
 import logging
 from pathlib import Path
 
-# own libraries
-
 # 3rd party libraries
 import numpy as np
 from spicelib import RawRead
 from pysignalscope import Scope, Channel
 
+# own libraries
+
+# configure root logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,7 @@ class ResultHandler:
         if not self._results_dir.is_dir():
             raise FileNotFoundError(f"Results directory does not exist: '{self._results_dir}'")
 
+        # Member variable declaration
         self._dialect = dialect
         self._raws = {}
         self._channels = {}

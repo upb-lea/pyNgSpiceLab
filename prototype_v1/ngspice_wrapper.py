@@ -1,5 +1,5 @@
 """
-Minimal ctypes wrapper around libngspice.so (the official ngspice shared-library API).
+ctypes wrapper around libngspice.so (the official ngspice shared-library API).
 
 Reference: https://ngspice.sourceforge.io/shared.html
 """

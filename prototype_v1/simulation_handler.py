@@ -9,13 +9,13 @@ Finally, it handles the simulation runs.
 import logging
 from pathlib import Path
 
+# 3rd party libraries
+
 # own libraries
 from circuit_handler import CircuitHandler
 from ngspice_wrapper import NgspiceWrapper
 
-# 3rd party libraries
-
-
+# configure root logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -46,18 +46,25 @@ class SimulationHandler:
         # Communicate with CircuitHandler for configuration information
         config_info = self._circuit_handler.get_circuit_info(config_number)
 
+        if config_info is None:
+            logger.info("Configuration does not exist.")
+            return
+
         # Set PSpice behavior to avoid file path case sensitivity issue
         self._ngspice.command("set ngbehavior=ps")
 
         # Source configuration schematic file path (Load the schematic into ngspice)
+        if config_info.config_path is None:
+            raise ValueError("Configuration path cannot be None")
         self._ngspice.source_file(config_info.config_path)
 
         # Alter parameters dynamically in memory of ngspice
         self._ngspice.alter(config_info.config_parameters)
 
         # The following line is to check that alter command works
-        self._ngspice.command("show r1")
-        self._ngspice.command("show c1")
+        self._ngspice.command("show rload")
+        self._ngspice.command("show c2")
+        self._ngspice.command("listing")
 
         # Setup transient simulation command
         tran_cmd = f"{config_info.sim_type} {config_info.sim_time_step} {config_info.sim_time}"
@@ -70,6 +77,8 @@ class SimulationHandler:
         self._ngspice.command(tran_cmd)
 
         # Save simulation results in a raw file
+        if config_info.circuit_name is None:
+            raise ValueError("Configuration path cannot be None")
         raw_result = self._save_raw_file(config_info.circuit_name, config_number)
         logger.info(f"Results saved to: {raw_result}")
 
