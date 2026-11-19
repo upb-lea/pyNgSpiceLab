@@ -1,0 +1,44 @@
+* KiCad schematic - GaN Half-Bridge Test Circuit
+
+* Use absolute path for the library file so ngspice can locate it regardless of CWD
+.lib /home/tatsat/whb/learning/ngspice_test_setup/libs/shared_library.lib
+.lib /home/tatsat/whb/learning/ngspice_test_setup/libs/active_adapter_Q1.lib
+.lib /home/tatsat/whb/learning/ngspice_test_setup/libs/active_adapter_Q2.lib
+.lib /home/tatsat/whb/learning/ngspice_test_setup/libs/active_adapter_Q3.lib
+.lib /home/tatsat/whb/learning/ngspice_test_setup/libs/active_adapter_Q4.lib
+.lib /home/tatsat/whb/learning/ngspice_test_setup/libs/active_adapter_Q5.lib
+.param Temp=27
+
+* Power Supply & DC Bus
+VLS2 DC_1 0 DC 48
+Lnet1 DC_1 HS 10n
+C1 HS 0 100u
+
+* High-Side Switches (3 terminals: Drain Gate Source)
+XQ1 HS Q1_Gate SW_Node GAN_DEVICE_Q1
+XQ2 HS Q2_Gate SW_Node GAN_DEVICE_Q2
+
+* Low-Side Switches (3 terminals: Drain Gate Source)
+XQ3 SW_Node Q3_Gate 0 GAN_DEVICE_Q3
+XQ4 SW_Node Q4_Gate 0 GAN_DEVICE_Q4
+XQ5 SW_Node Q5_Gate 0 GAN_DEVICE_Q5
+
+* Gate Resistors
+R1 D_HS Q1_Gate 5.1
+R2 D_HS Q2_Gate 5.1
+R3 D_LS Q3_Gate 10
+R4 D_LS Q4_Gate 10
+R5 D_LS Q5_Gate 10
+
+* Output Filter & Load
+L1 SW_Node Load 10u
+C2 Load 0 100n
+RLOAD Load 0 10
+
+* Gate Driver Pulse Sources
+VHS1 D_HS SW_Node PULSE(0 6 40n 2n 2n 789n 3.33u)
+VLS1 D_LS 0 PULSE(0 6 873n 2n 2n 2453n 3.33u)
+
+.options savecurrents
+
+.end
