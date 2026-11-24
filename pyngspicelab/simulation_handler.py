@@ -12,8 +12,8 @@ from pathlib import Path
 # 3rd party libraries
 
 # own libraries
-from circuit_handler import CircuitHandler
-from ngspice_wrapper import NgspiceWrapper
+from .circuit_handler import CircuitHandler
+from .ngspice_wrapper import NgspiceWrapper
 
 # configure root logger
 logging.basicConfig(level=logging.INFO)
@@ -50,7 +50,7 @@ class SimulationHandler:
             logger.info("Configuration does not exist.")
             return
 
-        # Set PSpice behavior to avoid file path case sensitivity issue
+        # Set P-Spice behavior to avoid file path case sensitivity issue
         self._ngspice.command("set ngbehavior=ps")
 
         # Source configuration schematic file path (Load the schematic into ngspice)
@@ -70,7 +70,7 @@ class SimulationHandler:
         self._ngspice.run_background()
         self._ngspice.wait_until_done()
 
-        # Perfom transient simulation
+        # Perform transient simulation
         self._ngspice.command(tran_cmd)
 
         # Save simulation results in a raw file
@@ -91,7 +91,7 @@ class SimulationHandler:
         :rtype: Path
         """
         # File path variable defining the naming convention of result files
-        raw_file = (self._result_directory / f"{circuit_name}-config_{config_number}.raw")
+        raw_file = (self._result_directory / f"{circuit_name}-configuration_{config_number}.raw")
 
         # Communicate with ngspice_wrapper library to write results to raw file
         self._ngspice.command(f"write {raw_file}")

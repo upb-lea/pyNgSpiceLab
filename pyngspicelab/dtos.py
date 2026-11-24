@@ -37,7 +37,7 @@ class UserRequestDto:
     """Contains configuration information given by the user."""
 
     circuit_path: str = ""  # main schematic file path for a circuit topology
-    library_map: dict[str, dict[str, str]] = field(default_factory=dict)  # A mapping of library names to its paths and subcircuit definitions
+    library_map: dict[str, dict[str, str]] = field(default_factory=dict)  # A mapping of library names to its paths and sub-circuit definitions
     configurations: List[ConfigInfoDto] = field(default_factory=list)
 
     def resolve(self) -> List[ConfigInfoDto]:
@@ -46,7 +46,7 @@ class UserRequestDto:
         circuit_name = circuit_file.stem  # e.g., "voltage_divider.cir" -> "voltage_divider"
 
         for idx, config in enumerate(self.configurations, start=1):
-            # Only fill in if the user has not overidden manually
+            # Only fill in if the user has not overridden manually
             if not config.circuit_name:
                 config.circuit_name = circuit_name
             if config.config_number is None:

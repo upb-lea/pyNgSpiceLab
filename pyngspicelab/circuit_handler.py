@@ -17,7 +17,7 @@ from pathlib import Path
 from spicelib import SpiceEditor
 
 # own libraries
-from dtos import ConfigInfoDto, UserRequestDto
+from .dtos import ConfigInfoDto, UserRequestDto
 
 # configure root logger
 logging.basicConfig(level=logging.INFO)
@@ -177,7 +177,7 @@ class CircuitHandler:
         config_path = self._schematic_file_path.parent / "configurations" / (f"config_{config.config_number}.cir")
 
         # Update the config path in the config
-        config.config_path = config_path
+        config.config_path = str(config_path)
 
         config_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -196,18 +196,18 @@ class CircuitHandler:
         # Insert the paths to the copied netlist (index 0 is the netlist title line)
         insert_index = 1
 
-        editor.netlist.insert(insert_index, f"* Shared Libraries:\n")
-        insert_index +=1
+        editor.netlist.insert(insert_index, "* Shared Libraries:\n")
+        insert_index += 1
 
         # Insert the shared library include directives
         for shared_lib in shared_lib_blocks:
             editor.netlist.insert(insert_index, f'{shared_lib}\n')
             insert_index += 1
 
-        editor.netlist.insert(insert_index, f"* Adapter Libraries:\n")
-        insert_index +=1
+        editor.netlist.insert(insert_index, "* Adapter Libraries:\n")
+        insert_index += 1
 
-        # Insert the adapter subcircuit definitions
+        # Insert the adapter sub-circuit definitions
         for adapter_lib in adapter_lib_blocks:
             # editor.netlist.insert(insert_index, f'.inc "{adapter_path}"\n')
             editor.netlist.insert(insert_index, f'{adapter_lib}\n')
@@ -217,7 +217,7 @@ class CircuitHandler:
         self._apply_component_values(editor, config)
         self._apply_voltage_sources(editor, config)
         self._apply_transistor_models(editor, config)
-        editor.add_instruction(f".options savecurrents")
+        editor.add_instruction(".options savecurrents")
 
         # Save back to the copy
         editor.save_netlist(str(config_path))
@@ -226,24 +226,24 @@ class CircuitHandler:
         self._circuit_info.append(config)
         return True
 
-    def _write_adapter_libraries(self, config: ConfigInfoDto, lib_map: dict[str, dict[str, str]]) -> tuple[str, list[str]]:
+    def _write_adapter_libraries(self, config: ConfigInfoDto, lib_map: dict[str, dict[str, str]]) -> tuple[list[str], list[str]]:
         """
-        Build the shared library include blocks and the per-transistor adapter subcircuit blocks.
+        Build the shared library include blocks and the per-transistor adapter sub-circuit blocks.
 
         :param config: Configuration containing the transistor-to-library assignments.
         :type config: ConfigInfoDto
         :param lib_map: Mapping of library name to its data (e.g. "path" and "subckt").
         :type lib_map: dict[str, dict[str, str]]
-        :return: Tuple of (shared library include blocks, adapter subcircuit blocks).
+        :return: Tuple of (shared library include blocks, adapter sub-circuit blocks).
             Note: both elements are lists of strings at runtime.
         :rtype: tuple[str, list[str]]
         :raises ValueError: If the configuration path is None.
         """
-        # Adapter library template: subcircuit wrapping one transistor position
+        # Adapter library template: sub-circuit wrapping one transistor position
         adapter_lib_template = dedent("""\
-        .subckt TRANSISTOR_DEVICE_{pos} D G S G
-        {pos} {adapter_subckt}
-        .ends TRANSISTOR_DEVICE_{pos}
+        .subckt TRANSISTOR_DEVICE_{position} D G S G
+        {position} {adapter_subckt}
+        .ends TRANSISTOR_DEVICE_{position}
         """)
 
         # Shared library template: include directive for a library file
@@ -261,7 +261,7 @@ class CircuitHandler:
             shared_lib = "".join(shared_lib_template.format(adapter_path=lib_map[lib]["path"]))
             shared_lib_blocks.append(shared_lib)
 
-        # To avoid codecheck.sh errors
+        # To avoid code check errors
         if config.config_path is None:
             raise ValueError("Configuration path cannot be None")
 
@@ -279,13 +279,9 @@ class CircuitHandler:
             # Format and write text to adapter library files
             adapter_lib = adapter_lib_template.format(
                 adapter_subckt=lib_map[transistor_lib]["subckt"],
-                pos=transistor
+                position=transistor
             )
             adapter_lib_blocks.append(adapter_lib)
-            # tmp_lib_path = config_dir / f"active_adapter_{transistor}.lib"
-            # tmp_lib_path.write_text(tmp_lib_text)
-
-            # adapter_lib_paths.append(tmp_lib_path)
 
         return shared_lib_blocks, adapter_lib_blocks
 
@@ -354,7 +350,7 @@ class CircuitHandler:
 
     def _apply_transistor_models(self, editor: SpiceEditor, config: ConfigInfoDto) -> None:
         """
-        Assign the generated adapter subcircuit model to each transistor of the configuration.
+        Assign the generated adapter sub-circuit model to each transistor of the configuration.
 
         :param editor: Editor holding the netlist copy to modify.
         :type editor: SpiceEditor

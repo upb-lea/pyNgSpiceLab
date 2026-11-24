@@ -16,7 +16,7 @@ from pyngspicelab import ConfigInfoDto, UserRequestDto, SessionHandler, ResultHa
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 # Circuit files path
-CIRCUIT_DIR = PROJECT_ROOT / "examples" / "user_defined_libraries"
+CIRCUIT_DIR = PROJECT_ROOT / "examples" / "user_defined_circuits"
 
 # Component model library path
 LIBRARY_DIR = PROJECT_ROOT / "examples" / "libraries"
@@ -26,21 +26,21 @@ request = UserRequestDto(
 
     # Main schematic file path for a circuit topology
     # Replace the path to the test circuit here
-    # Also replace the path to the library in the test_circuit.cir (currenctly not required as circuit is adapted with all libraries)
-    circuit_path= CIRCUIT_DIR / "test_circuit.cir",
+    # Also replace the path to the library in the test_circuit.cir (currently not required as circuit is adapted with all libraries)
+    circuit_path=str(CIRCUIT_DIR / "test_circuit.cir"),
 
-    # Mapping of library names to library paths and subcircuit definitions
+    # Mapping of library names to library paths and sub circuit definitions
     library_map={
         "GA_org": {
-            "path": LIBRARY_DIR / "GaN_PSpice_GS61008T_L1V4P1_ASA.lib",
+            "path": str(LIBRARY_DIR / "GaN_PSpice_GS61008T_L1V4P1_ASA.lib"),
             "subckt": "D G S G GaN_PSpice_GS61008T_L1V4P1"
         },
         "GA_changed": {
-            "path": LIBRARY_DIR / "GaN_PSpice_GS61008T_L1V4P1_ASA_CHG.lib",
+            "path": str(LIBRARY_DIR / "GaN_PSpice_GS61008T_L1V4P1_ASA_CHG.lib"),
             "subckt": "D G S G GaN_PSpice_GS61008T_L1V4P1_CHG"
         },
         "GA_EPC": {
-            "path": LIBRARY_DIR / "EPC2212_V1_PSPICE.net",
+            "path": str(LIBRARY_DIR / "EPC2212_V1_PSPICE.net"),
             "subckt": "G D S  EPC2212"
         }
     },
@@ -48,21 +48,21 @@ request = UserRequestDto(
     # Circuit configuration parameters list
     configurations=[
         ConfigInfoDto(
-            config_parameters={"r42": "5.8", "C2": "1.5u", "R1": "5.1"},
+            config_parameters={"rload": "5.8", "C2": "1.5u", "R1": "5.1"},
             config_libraries={"XQ1": "GA_org", "XQ2": "GA_org", "XQ3": "GA_org", "XQ4": "GA_org", "XQ5": "GA_org"},
             voltage_sources={"VHS1": "PULSE(0 6 40n 2n 2n 1.739290u 3.486580u)", "VLS1": "PULSE(0 6 1.803290u 2n 2n 1.703290u 3.486580u)"},
             sim_time_step="50n",
             sim_time="100u"
         ),
         ConfigInfoDto(
-            config_parameters={"r42": "5.8", "C2": "1.5u", "R1": "5.1"},
+            config_parameters={"rLoad": "5.8", "C2": "1.5u", "R1": "5.1"},
             config_libraries={"XQ1": "GA_changed", "XQ2": "GA_changed", "XQ3": "GA_changed", "XQ4": "GA_changed", "XQ5": "GA_changed"},
             voltage_sources={"VHS1": "PULSE(0 6 40n 2n 2n 1.739290u 3.486580u)", "VLS1": "PULSE(0 6 1.803290u 2n 2n 1.703290u 3.486580u)"},
             sim_time_step="50n",
             sim_time="100u"
         )
         # ConfigInfoDto(
-        #     config_parameters={"R42": "25", "C2": "10u"},
+        #     config_parameters={"RLoAd": "25", "C2": "10u"},
         #     config_libraries={"XQ1": "GA_org", "XQ2": "GA_org", "XQ3": "GA_org", "XQ4": "GA_org", "XQ5": "GA_org"},
         #     voltage_sources={"VHS1": "PULSE(0 6 40n 2n 2n 789n 3.33u)", "VLS1": "PULSE(0 6 873n 2n 2n 2453n 3.33u)"},
         #     sim_time_step="50n",
