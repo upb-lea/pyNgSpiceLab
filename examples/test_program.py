@@ -10,9 +10,16 @@ from pathlib import Path
 from pysignalscope import Scope
 
 # own libraries
-from dtos import ConfigInfoDto, UserRequestDto
-from ngspice_ctl import SessionHandler
-from result_handler import ResultHandler
+from pyngspicelab import ConfigInfoDto, UserRequestDto, SessionHandler, ResultHandler
+
+# Project root folder path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+# Circuit files path
+CIRCUIT_DIR = PROJECT_ROOT / "examples" / "user_defined_libraries"
+
+# Component model library path
+LIBRARY_DIR = PROJECT_ROOT / "examples" / "libraries"
 
 # User request declaration
 request = UserRequestDto(
@@ -20,20 +27,20 @@ request = UserRequestDto(
     # Main schematic file path for a circuit topology
     # Replace the path to the test circuit here
     # Also replace the path to the library in the test_circuit.cir (currenctly not required as circuit is adapted with all libraries)
-    circuit_path="prototype_v1/circuit_files/test_circuit_2.cir",
+    circuit_path= CIRCUIT_DIR / "test_circuit.cir",
 
     # Mapping of library names to library paths and subcircuit definitions
     library_map={
         "GA_org": {
-            "path": "prototype_v1/circuit_files/GaN_PSpice_GS61008T_L1V4P1_ASA.lib",
+            "path": LIBRARY_DIR / "GaN_PSpice_GS61008T_L1V4P1_ASA.lib",
             "subckt": "D G S G GaN_PSpice_GS61008T_L1V4P1"
         },
         "GA_changed": {
-            "path": "prototype_v1/circuit_files/GaN_PSpice_GS61008T_L1V4P1_ASA_CHG.lib",
+            "path": LIBRARY_DIR / "GaN_PSpice_GS61008T_L1V4P1_ASA_CHG.lib",
             "subckt": "D G S G GaN_PSpice_GS61008T_L1V4P1_CHG"
         },
         "GA_EPC": {
-            "path": "prototype_v1/circuit_files/EPC2212_V1_PSPICE.net",
+            "path": LIBRARY_DIR / "EPC2212_V1_PSPICE.net",
             "subckt": "G D S  EPC2212"
         }
     },
@@ -70,11 +77,12 @@ session = SessionHandler()
 session.start_workflow(request)
 
 # View results of completed simulations
-results_path = Path(r"/home/tatsat/whb/github/pyNgSpiceLab/results")
+results_path = PROJECT_ROOT / "results"
+results_path.mkdir(parents=True, exist_ok=True)
 handler = ResultHandler(results_path)
 
-a = handler.load_run("test_circuit_2", 1)
-b = handler.load_run("test_circuit_2", 2)
+a = handler.load_run("test_circuit", 1)
+b = handler.load_run("test_circuit", 2)
 
 print(handler.list_signals(a))     # the user sees what exists, then chooses
 print(handler.list_signals(b))     # may differ from run a
