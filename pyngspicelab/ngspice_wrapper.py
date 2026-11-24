@@ -40,7 +40,7 @@ class vecvaluesall(Structure):
 
 
 # ---------------------------------------------------------------------------
-# Callback signatures required by ngspice_init
+# Callback signatures required by ngSpice_Init
 # ---------------------------------------------------------------------------
 SendChar = CFUNCTYPE(c_int, c_char_p, c_int, c_void_p)
 SendStat = CFUNCTYPE(c_int, c_char_p, c_int, c_void_p)
@@ -101,18 +101,18 @@ class NgspiceWrapper:
         self._cb_send_init = SendInitData(lambda *a: 0)
         self._cb_bg_running = BGThreadRunning(self._on_bg_running)
 
-        self._lib.ngspice_init.argtypes = [
+        self._lib.ngSpice_Init.argtypes = [
             SendChar, SendStat, ControlledExit, SendData, SendInitData,
             BGThreadRunning, c_void_p,
         ]
-        self._lib.ngspice_init.restype = c_int
+        self._lib.ngSpice_Init.restype = c_int
 
-        rc = self._lib.ngspice_init(
+        rc = self._lib.ngSpice_Init(
             self._cb_send_char, self._cb_send_stat, self._cb_exit,
             self._cb_send_data, self._cb_send_init, self._cb_bg_running, None,
         )
         if rc != 0:
-            raise RuntimeError(f"ngspice_init failed with code {rc}")
+            raise RuntimeError(f"ngSpice_Init failed with code {rc}")
 
         self._lib.ngSpice_Command.argtypes = [c_char_p]
         self._lib.ngSpice_Command.restype = c_int
@@ -128,8 +128,8 @@ class NgspiceWrapper:
 
         self._lib.ngSpice_CurPlot.restype = c_char_p
 
-        self._lib.ngspice_running.argtypes = []
-        self._lib.ngspice_running.restype = c_bool
+        self._lib.ngSpice_running.argtypes = []
+        self._lib.ngSpice_running.restype = c_bool
 
     # -- callbacks -----------------------------------------------------
     def _on_send_char(self, message, ident, user_data):
@@ -179,15 +179,15 @@ class NgspiceWrapper:
 
     def running(self) -> bool:
         """Return whether a background ngspice simulation is running."""
-        return bool(self._lib.ngspice_running())
+        return bool(self._lib.ngSpice_running())
 
     def wait_until_done(self, poll_interval: float = 0.05) -> None:
         """
-        Block until the background run finishes (polls ngspice_running).
+        Block until the background run finishes (polls ngSpice_running).
 
         :param poll_interval: Time in seconds between running-state checks.
         """
-        # small startup grace period so ngspice_running() has time to flip True
+        # small startup grace period so ngSpice_running() has time to flip True
         time.sleep(poll_interval)
         while self.running():
             time.sleep(poll_interval)

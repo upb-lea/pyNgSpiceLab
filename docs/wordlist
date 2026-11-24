@@ -50,6 +50,7 @@ ASA
 PSpice
 PSPICE
 init
+ngSpice
 
 str
 bool

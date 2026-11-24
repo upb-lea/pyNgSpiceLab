@@ -51,14 +51,21 @@ class CircuitHandler:
         lib_map = request.library_map  # Mapping of library name -> {"path": ..., "subckt": ...}
         is_consistent: bool = True
 
+        # Create a copy of user provided netlist
+        source_path = Path(self._schematic_file_path)
+        if source_path.is_file():
+            snapshot_path = source_path.parent / "configurations" / f"{source_path.stem}_snapshot{source_path.suffix}"
+            snapshot_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source_path, snapshot_path)
+
         # Check schematic file
-        if not self._validate_schematic():
+        if not self._validate_schematic(snapshot_path):
             is_consistent = False
             logger. info("Schematic validation failed.")
             return is_consistent
 
         # Check the configuration parameters
-        if not self._validate_configs(config_params_list):
+        if not self._validate_configs(config_params_list, snapshot_path):
             is_consistent = False
             logger.info("Configuration validation failed.")
             return is_consistent
@@ -66,13 +73,13 @@ class CircuitHandler:
         # Adapt schematic for each configuration
         logger.info("Configuration schematic adaption started.")
         for config in config_params_list:
-            self._adapt_schematic_file(config, lib_map)
+            self._adapt_schematic_file(config, lib_map, snapshot_path)
         logger.info("Configuration schematic adaption complete.")
         
         logger.info("Initialization of the circuit configuration completed.")
         return is_consistent
 
-    def _validate_schematic(self) -> bool:
+    def _validate_schematic(self, schematic_file_path: Path) -> bool:
         """
         Verify the existence of main schematic file and other necessary checks if required.
 
@@ -80,19 +87,19 @@ class CircuitHandler:
         :rtype: bool
         """
         # The path must exist
-        if not os.path.exists(self._schematic_file_path):
-            logger.warning(f"Schematic file not found: {self._schematic_file_path}")
+        if not os.path.exists(schematic_file_path):
+            logger.warning(f"Schematic file not found: {schematic_file_path}")
             return False
 
         # The path must be a file (not a directory)
-        if not Path(self._schematic_file_path).is_file():
-            logger.warning(f"Invalid schematic file: {self._schematic_file_path}")
+        if not Path(schematic_file_path).is_file():
+            logger.warning(f"Invalid schematic file: {schematic_file_path}")
             return False
 
         logger.info("Schematic file path is valid.")
         return True
 
-    def _validate_configs(self, config_params_list: List[ConfigInfoDto]) -> bool:
+    def _validate_configs(self, config_params_list: List[ConfigInfoDto], schematic_file_path: Path) -> bool:
         """
         Validate component and voltage source names and values in all configurations.
 
@@ -107,8 +114,8 @@ class CircuitHandler:
             logger.warning("No configurations provided to validate.")
             return True
 
-        editor = SpiceEditor(self._schematic_file_path)
-        logger.info(f"circuit_path: {self._schematic_file_path}")
+        editor = SpiceEditor(schematic_file_path)
+        logger.info(f"circuit_path: {schematic_file_path}")
 
         # Uppercase all netlist component names for case-insensitive comparison
         all_components_upper = [str(item).upper() for item in editor.get_components()]
@@ -158,7 +165,7 @@ class CircuitHandler:
 
         return True
 
-    def _adapt_schematic_file(self, config: ConfigInfoDto, lib_map: dict[str, dict[str, str]]) -> bool:
+    def _adapt_schematic_file(self, config: ConfigInfoDto, lib_map: dict[str, dict[str, str]], schematic_file_path: Path) -> bool:
         """
         Copy the user's netlist, apply this configuration's changes to the copy, and update the ConfigInfoDto.
 
@@ -174,7 +181,7 @@ class CircuitHandler:
             raise ValueError("Configuration path cannot be None")
 
         # Generate a different path for the configuration circuit files
-        config_path = self._schematic_file_path.parent / "configurations" / (f"config_{config.config_number}.cir")
+        config_path = schematic_file_path.parent / "configurations" / (f"config_{config.config_number}.cir")
 
         # Update the config path in the config
         config.config_path = str(config_path)
@@ -182,7 +189,7 @@ class CircuitHandler:
         config_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Copy the original netlist (user's file stays untouched)
-        shutil.copy2(self._schematic_file_path, config_path)
+        shutil.copy2(schematic_file_path, config_path)
 
         # Write the adapter library files for this configuration
         shared_lib_blocks, adapter_lib_blocks = self._write_adapter_libraries(config, lib_map)
