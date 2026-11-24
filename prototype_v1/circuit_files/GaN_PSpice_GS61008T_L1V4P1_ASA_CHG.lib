@@ -32,7 +32,7 @@
 *Level 1. Optimized for simulation speed
 *$
 *$
-.subckt GaN_PSpice_GS61008T_L1V4P1 drainin gate1in sourcein gate2in
+.subckt GaN_PSpice_GS61008T_L1V4P1_CHG drainin gate1in sourcein gate2in
 *
 *
 .param rTC=-0.004  gan_res={4.38e-03}		metal_res={2.0e-3}   gtc=2.8 sh_s=0.239   sh_d=0.761

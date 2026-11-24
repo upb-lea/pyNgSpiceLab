@@ -58,10 +58,7 @@ class SimulationHandler:
             raise ValueError("Configuration path cannot be None")
         self._ngspice.source_file(config_info.config_path)
 
-        # Alter parameters dynamically in memory of ngspice
-        self._ngspice.alter(config_info.config_parameters)
-
-        # The following line is to check that alter command works
+        # The following lines are to check component values and models
         self._ngspice.command("show rload")
         self._ngspice.command("show c2")
         self._ngspice.command("listing")

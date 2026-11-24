@@ -21,6 +21,7 @@ class ConfigInfoDto:
     # These fields are the typically provided by the user
     config_parameters: Dict[str, str]
     config_libraries: Dict[str, str]  # e.g., {"Transistor1": "GA_org", "Transistor2": "GA_CHG"}
+    voltage_sources: Dict[str, str]
     sim_time_step: str  # simulation time step with units
     sim_time: str  # simulation total time with units
 

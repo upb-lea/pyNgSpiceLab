@@ -15,6 +15,7 @@ docs/build
 dictionary.dic
 readme.html
 results/
+temp/
 
 # Python virtual environments
 .venv/

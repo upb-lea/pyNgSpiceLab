@@ -20,7 +20,7 @@ request = UserRequestDto(
     # Main schematic file path for a circuit topology
     # Replace the path to the test circuit here
     # Also replace the path to the library in the test_circuit.cir (currenctly not required as circuit is adapted with all libraries)
-    circuit_path="prototype_v1/circuit_files/test_circuit.cir",
+    circuit_path="prototype_v1/circuit_files/test_circuit_2.cir",
 
     # Mapping of library names to library paths and subcircuit definitions
     library_map={
@@ -41,17 +41,26 @@ request = UserRequestDto(
     # Circuit configuration parameters list
     configurations=[
         ConfigInfoDto(
-            config_parameters={"rload": "5.8", "C2": "1.5u", "R1": "10"},
-            config_libraries={"Q1": "GA_org", "Q2": "GA_changed", "Q3": "GA_EPC", "Q4": "GA_org", "Q5": "GA_org"},
-            sim_time_step="1u",
+            config_parameters={"r42": "5.8", "C2": "1.5u", "R1": "5.1"},
+            config_libraries={"XQ1": "GA_org", "XQ2": "GA_org", "XQ3": "GA_org", "XQ4": "GA_org", "XQ5": "GA_org"},
+            voltage_sources={"VHS1": "PULSE(0 6 40n 2n 2n 1.739290u 3.486580u)", "VLS1": "PULSE(0 6 1.803290u 2n 2n 1.703290u 3.486580u)"},
+            sim_time_step="50n",
             sim_time="100u"
         ),
         ConfigInfoDto(
-            config_parameters={"RlOad": "25", "C2": "10u"},
-            config_libraries={"Q1": "GA_org", "Q2": "GA_changed", "Q3": "GA_EPC", "Q4": "GA_EPC", "Q5": "GA_changed"},
-            sim_time_step="1u",
+            config_parameters={"r42": "5.8", "C2": "1.5u", "R1": "5.1"},
+            config_libraries={"XQ1": "GA_changed", "XQ2": "GA_changed", "XQ3": "GA_changed", "XQ4": "GA_changed", "XQ5": "GA_changed"},
+            voltage_sources={"VHS1": "PULSE(0 6 40n 2n 2n 1.739290u 3.486580u)", "VLS1": "PULSE(0 6 1.803290u 2n 2n 1.703290u 3.486580u)"},
+            sim_time_step="50n",
             sim_time="100u"
         )
+        # ConfigInfoDto(
+        #     config_parameters={"R42": "25", "C2": "10u"},
+        #     config_libraries={"XQ1": "GA_org", "XQ2": "GA_org", "XQ3": "GA_org", "XQ4": "GA_org", "XQ5": "GA_org"},
+        #     voltage_sources={"VHS1": "PULSE(0 6 40n 2n 2n 789n 3.33u)", "VLS1": "PULSE(0 6 873n 2n 2n 2453n 3.33u)"},
+        #     sim_time_step="50n",
+        #     sim_time="100u"
+        # )
     ]
 )
 
@@ -64,11 +73,11 @@ session.start_workflow(request)
 results_path = Path(r"/home/tatsat/whb/github/pyNgSpiceLab/results")
 handler = ResultHandler(results_path)
 
-a = handler.load_run("test_circuit", 1)
-b = handler.load_run("test_circuit", 2)
+a = handler.load_run("test_circuit_2", 1)
+b = handler.load_run("test_circuit_2", 2)
 
-# print(handler.list_signals(a))     # the user sees what exists, then chooses
-# print(handler.list_signals(b))     # may differ from run a
+print(handler.list_signals(a))     # the user sees what exists, then chooses
+print(handler.list_signals(b))     # may differ from run a
 
-channels = handler.get_channels([(a, "V(dc_1)"), (a, "V(load)"), (b, "V(dc_1)"), (b, "V(load)"), (a, "I(@rload[i])")])
+channels = handler.get_channels([(a, "V(dc_1)"), (a, "V(load)"), (a, "I(@L1[i])"), (b, "V(dc_1)"), (b, "V(load)")])
 Scope.plot_channels(channels)
