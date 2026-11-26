@@ -51,6 +51,8 @@ PSpice
 PSPICE
 init
 ngSpice
+cmd
+func
 
 str
 bool
@@ -59,6 +61,8 @@ ValueError
 SpiceEditor
 PySignalScope
 RawRead
+Enum
+enum
 
 UserRequestDto
 ConfigInfoDto
@@ -68,3 +72,7 @@ SimulationHandler
 TriggerHandler
 ResultHandler
 NgspiceWrapper
+TriggerCondition
+WindowStatistic
+CrossDirection
+ComparisonOperator

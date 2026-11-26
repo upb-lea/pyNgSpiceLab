@@ -29,6 +29,7 @@ class ConfigInfoDto:
     circuit_name: Optional[str] = None  # name of the original schematic circuit file
     config_number: Optional[int] = None
     config_path: Optional[str] = None  # adapted schematic file path with adapter libraries for a configuration
+    trigger_condition: Optional[str] = None  # e.g., "v(out) > 3.3"; None means run to sim_time
     
     sim_type: Optional[str] = "tran"  # simulation type: Currently only supports 'Transient'
 

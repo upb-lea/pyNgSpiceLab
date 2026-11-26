@@ -181,7 +181,7 @@ class CircuitHandler:
             raise ValueError("Configuration path cannot be None")
 
         # Generate a different path for the configuration circuit files
-        config_path = schematic_file_path.parent / "configurations" / (f"config_{config.config_number}.cir")
+        config_path = schematic_file_path.parent / (f"config_{config.config_number}.cir")
 
         # Update the config path in the config
         config.config_path = str(config_path)
@@ -225,6 +225,10 @@ class CircuitHandler:
         self._apply_voltage_sources(editor, config)
         self._apply_transistor_models(editor, config)
         editor.add_instruction(".options savecurrents")
+
+        # Add the transient analysis command
+        tran_cmd = f".{config.sim_type} {config.sim_time_step} {config.sim_time}"
+        editor.add_instruction(tran_cmd)
 
         # Save back to the copy
         editor.save_netlist(str(config_path))

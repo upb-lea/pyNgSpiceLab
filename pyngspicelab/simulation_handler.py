@@ -13,6 +13,7 @@ from pathlib import Path
 
 # own libraries
 from .circuit_handler import CircuitHandler
+from .trigger_handler import TriggerHandler
 from .ngspice_wrapper import NgspiceWrapper
 
 # configure root logger
@@ -43,12 +44,22 @@ class SimulationHandler:
         """
         logger.info(f"Starting simulation process for config_number: {config_number}")
 
+        # Create a Trigger Handler object
+        self._trigger_handler = None
+
         # Communicate with CircuitHandler for configuration information
         config_info = self._circuit_handler.get_circuit_info(config_number)
 
         if config_info is None:
             logger.info("Configuration does not exist.")
             return
+
+        # Check if dynamic stopping of simulation is enabled
+        if config_info.trigger_condition is not None:
+            self._trigger_handler = TriggerHandler(config_info.trigger_condition, self._ngspice)
+            self._ngspice._on_data_user_cb = self._trigger_handler.on_simulation_data
+        else:
+            self._ngspice._on_data_user_cb = None
 
         # Set P-Spice behavior to avoid file path case sensitivity issue
         self._ngspice.command("set ngbehavior=ps")
@@ -59,19 +70,16 @@ class SimulationHandler:
         self._ngspice.source_file(config_info.config_path)
 
         # The following lines are to check component values and models
-        self._ngspice.command("show rload")
-        self._ngspice.command("show c2")
-        self._ngspice.command("listing")
+        # self._ngspice.command("show rload")
+        # self._ngspice.command("show c2")
+        # self._ngspice.command("listing")
 
         # Setup transient simulation command
-        tran_cmd = f"{config_info.sim_type} {config_info.sim_time_step} {config_info.sim_time}"
+        # tran_cmd = f"{config_info.sim_type} {config_info.sim_time_step} {config_info.sim_time}"
 
-        # Run in background
+        # Perform transient simulation in background
         self._ngspice.run_background()
         self._ngspice.wait_until_done()
-
-        # Perform transient simulation
-        self._ngspice.command(tran_cmd)
 
         # Save simulation results in a raw file
         if config_info.circuit_name is None:

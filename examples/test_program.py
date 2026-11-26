@@ -52,14 +52,21 @@ request = UserRequestDto(
             config_libraries={"XQ1": "GA_org", "XQ2": "GA_org", "XQ3": "GA_org", "XQ4": "GA_org", "XQ5": "GA_org"},
             voltage_sources={"VHS1": "PULSE(0 6 40n 2n 2n 1.739290u 3.486580u)", "VLS1": "PULSE(0 6 1.803290u 2n 2n 1.703290u 3.486580u)"},
             sim_time_step="50n",
-            sim_time="100u"
+            sim_time="1000u",
+            # trigger_condition="load range < 0.2 0.000010"
+            trigger_condition="load range < 3.5 0.000010"
+            # trigger_condition="load rising 11"
+            # trigger_condition="load > 5"
+            # trigger_condition="load avg > 11 0.000010"
         ),
         ConfigInfoDto(
-            config_parameters={"rLoad": "5.8", "C2": "1.5u", "R1": "5.1"},
+            config_parameters={"rLoad": "8", "C2": "2u", "R1": "5.1"},
             config_libraries={"XQ1": "GA_changed", "XQ2": "GA_changed", "XQ3": "GA_changed", "XQ4": "GA_changed", "XQ5": "GA_changed"},
             voltage_sources={"VHS1": "PULSE(0 6 40n 2n 2n 1.739290u 3.486580u)", "VLS1": "PULSE(0 6 1.803290u 2n 2n 1.703290u 3.486580u)"},
             sim_time_step="50n",
-            sim_time="100u"
+            sim_time="1000u",
+            trigger_condition="load falling 26"
+            # trigger_condition="load > 10"
         )
         # ConfigInfoDto(
         #     config_parameters={"RLoAd": "25", "C2": "10u"},
@@ -84,8 +91,8 @@ handler = ResultHandler(results_path)
 a = handler.load_run("test_circuit", 1)
 b = handler.load_run("test_circuit", 2)
 
-print(handler.list_signals(a))     # the user sees what exists, then chooses
-print(handler.list_signals(b))     # may differ from run a
+# print(handler.list_signals(a))     # the user sees what exists, then chooses
+# print(handler.list_signals(b))     # may differ from run a
 
 channels = handler.get_channels([(a, "V(dc_1)"), (a, "V(load)"), (a, "I(@L1[i])"), (b, "V(dc_1)"), (b, "V(load)")])
 Scope.plot_channels(channels)

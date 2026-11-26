@@ -12,6 +12,7 @@ import numpy as np
 import time
 from pathlib import Path
 from typing import Callable
+import threading
 
 # ---------------------------------------------------------------------------
 # vecvalues / vecvaluesall structs (matches ngspice/sharedspice.h)
@@ -240,7 +241,7 @@ class NgspiceWrapper:
 
     def stop(self):
         """Stop a running background simulation."""
-        return self.command("bg_halt")
+        threading.Thread(target=self.command, args=("bg_halt",), daemon=True).start()
 
     # -- Additions to NgSpiceShared class --------------------------------
 
