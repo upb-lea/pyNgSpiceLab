@@ -56,11 +56,11 @@ jobs:
             pip install -e .
             pip install pytest
 
-      # Runs a set of commands using the runners shell
+      # Runs a set of commands using the runners shell. To satisfy the graphic GUI request use virtual screen (xvfb command)
       - name: Run pytests
         run: |
           echo Start testing...
-          pytest tests
+          xvfb-run -a pytest tests
           echo tests finished.
 
       - name: Install sphinx and build documentation with sphinx
