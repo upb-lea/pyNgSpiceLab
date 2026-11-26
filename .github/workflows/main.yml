@@ -45,6 +45,12 @@ jobs:
           pip install types-toml
           mypy $(git ls-files '*.py')
 
+      # tkinter is needed to import pysignalscope
+      - name: tkinter
+        run: |
+          # try to install tkinter
+          sudo apt install python3-tk
+
       - name: install this package
         run: |
             pip install -e .

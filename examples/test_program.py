@@ -13,13 +13,13 @@ from pysignalscope import Scope
 from pyngspicelab import ConfigInfoDto, UserRequestDto, SessionHandler, ResultHandler
 
 # Project root folder path
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+WORKING_DIRECTORY = Path(__file__).resolve().parent
 
 # Circuit files path
-CIRCUIT_DIR = PROJECT_ROOT / "examples" / "user_defined_circuits"
+CIRCUIT_DIR = WORKING_DIRECTORY / "user_defined_circuits"
 
 # Component model library path
-LIBRARY_DIR = PROJECT_ROOT / "examples" / "libraries"
+LIBRARY_DIR = WORKING_DIRECTORY / "libraries"
 
 # User request declaration
 request = UserRequestDto(
@@ -77,7 +77,7 @@ session = SessionHandler()
 session.start_workflow(request)
 
 # View results of completed simulations
-results_path = PROJECT_ROOT / "results"
+results_path = WORKING_DIRECTORY / "results"
 results_path.mkdir(parents=True, exist_ok=True)
 handler = ResultHandler(results_path)
 
