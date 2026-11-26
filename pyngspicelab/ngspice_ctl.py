@@ -12,10 +12,10 @@ from typing import List
 # 3rd party libraries
 
 # own libraries
-from dtos import ConfigInfoDto, UserRequestDto
-from circuit_handler import CircuitHandler
-from simulation_handler import SimulationHandler
-from result_handler import ResultHandler
+from .dtos import ConfigInfoDto, UserRequestDto
+from .circuit_handler import CircuitHandler
+from .simulation_handler import SimulationHandler
+from .result_handler import ResultHandler
 
 # configure root logger
 logging.basicConfig(level=logging.INFO)

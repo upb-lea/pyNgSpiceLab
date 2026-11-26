@@ -1,7 +1,7 @@
 """
-ctypes wrapper around libngspice.so (the official ngspice shared-library API).
+c-types wrapper around libngspice.so (the official ngspice shared-library API).
 
-Reference: https://ngspice.sourceforge.io/shared.html
+Reference: 'https://ngspice.sourceforge.io/shared.html'
 """
 import ctypes
 from ctypes import (
@@ -15,7 +15,7 @@ from typing import Callable
 
 # ---------------------------------------------------------------------------
 # vecvalues / vecvaluesall structs (matches ngspice/sharedspice.h)
-# These are what SendData hands you on every timestep during bg_run.
+# These are what SendData hands you on every time step during bg_run.
 # ---------------------------------------------------------------------------
 class vecvalues(Structure):
     """Represent a single ngspice vector value."""
@@ -51,7 +51,7 @@ BGThreadRunning = CFUNCTYPE(c_int, c_bool, c_int, c_void_p)
 
 
 # ---------------------------------------------------------------------------
-# vector_info struct (matches ngspice/sharedspice.h) - used for post-hoc reads
+# vector_info structs (matches ngspice/sharedspice.h) - used for post-hoc reads
 # ---------------------------------------------------------------------------
 class vector_info(Structure):
     """Represent metadata and data storage for an ngspice vector."""
@@ -61,21 +61,21 @@ class vector_info(Structure):
         ("v_type", c_int),
         ("v_flags", c_short),
         ("v_realdata", POINTER(c_double)),
-        ("v_compdata", c_void_p),   # ncomplex*, unused here
+        ("v_compdata", c_void_p),   # n-complex*, unused here
         ("v_length", c_int),
     ]
 
 
 class NgspiceWrapper:
     """
-    Thin wrapper around libngspice.so.
+    Thin wrapper around 'libngspice.so'.
 
     Usage:
-        ng = NgSpiceShared()
-        ng.load_circuit(["V1 1 0 DC 5", "R1 1 0 1k", ".op", ".end"])
-        ng.command("tran 1u 1m")
-        t = ng.get_vector("time")
-        v = ng.get_vector("v(1)")
+        ngspice = NgSpiceShared()
+        ngspice.load_circuit(["V1 1 0 DC 5", "R1 1 0 1k", ".op", ".end"])
+        ngspice.command("tran 1u 1m")
+        t = ngspice.get_vector("time")
+        v = ngspice.get_vector("v(1)")
     """
 
     def __init__(self, lib_name: str = "libngspice.so", verbose: bool = True,
@@ -84,7 +84,7 @@ class NgspiceWrapper:
         Initialize the ngspice shared-library interface.
 
         on_data: optional callable(dict[str, float], step_index: int) invoked
-                 on every timestep while a simulation is running in the
+                 on every time step while a simulation is running in the
                  background (bg_run). Receives the current real value of
                  every vector, keyed by name (e.g. 'V(1)', 'time').
         """
@@ -160,13 +160,13 @@ class NgspiceWrapper:
         return 0
 
     # -- public API ------------------------------------------------------
-    def command(self, cmd: str) -> int:
+    def command(self, command: str) -> int:
         """
         Send a raw ngspice command, e.g. 'tran 1u 1m' or 'alter r1=2k'.
 
-        :param cmd: Raw ngspice command to execute.
+        :param command: Raw ngspice command to execute.
         """
-        return int(self._lib.ngSpice_Command(cmd.encode()))
+        return int(self._lib.ngSpice_Command(command.encode()))
 
     def run_background(self) -> int:
         """
@@ -248,9 +248,8 @@ class NgspiceWrapper:
         """
         Alters circuit element values or model parameters dynamically.
 
-        Args:
-            parameters: Dictionary of parameters to alter,
-                        e.g., {"R1": "2k", "V1": 5.0, "M1[W]": "10u"}
+        :param parameters: Dictionary of parameters to alter,
+            e.g., {"R1": "2k", "V1": 5.0, "M1[W]": "10u"}
         """
         for param_name, val in parameters.items():
             # Constructs and sends: alter <param_name> = <val>

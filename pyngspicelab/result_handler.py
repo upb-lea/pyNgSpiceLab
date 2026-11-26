@@ -58,7 +58,7 @@ class ResultHandler:
         :rtype: str
         """
         # Run ID follows the naming convention of the result files
-        run_id = f"{circuit_name}-config_{config_number}"
+        run_id = f"{circuit_name}-configuration_{config_number}"
 
         # Open the raw file only once
         if run_id not in self._raws:

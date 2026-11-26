@@ -15,6 +15,7 @@ docs/build
 dictionary.dic
 readme.html
 results/
+temp/
 
 # Python virtual environments
 .venv/
@@ -23,3 +24,6 @@ venv
 # Python cache files
 __pycache__/
 *.py[cod]
+
+# Generated simulation configurations
+**/configurations/
